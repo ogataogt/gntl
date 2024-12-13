@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>グノーシア推理補助ツール</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .settings {
+            margin-bottom: 15px;
+        }
+        .settings div {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>グノーシア推理補助ツール</h1>
+    <p>初期条件を設定してください。</p>
+
+    <form id="settings-form">
+        <!-- 乗員人数設定 -->
+        <div class="settings">
+            <label for="player-count">乗員人数:</label>
+            <select id="player-count" name="player-count">
+                <!-- 最大15人まで選択可能 -->
+                ${[...Array(15).keys()].map(i => `<option value="${i + 1}">${i + 1} 人</option>`).join('')}
+            </select>
+        </div>
+
+        <!-- 役職と人数の設定 -->
+        <div class="settings">
+            <p>役職を設定してください:</p>
+            <div>
+                <label for="gnosia-count">グノーシア:</label>
+                <input type="number" id="gnosia-count" name="gnosia-count" min="0" max="15" value="1"> 人
+            </div>
+            <div>
+                <label><input type="checkbox" id="engineer" name="roles" value="engineer"> エンジニア</label>
+            </div>
+            <div>
+                <label><input type="checkbox" id="doctor" name="roles" value="doctor"> ドクター</label>
+            </div>
+            <div>
+                <label><input type="checkbox" id="guardian-angel" name="roles" value="guardian-angel"> 守護天使</label>
+            </div>
+            <div>
+                <label><input type="checkbox" id="guard" name="roles" value="guard"> 留守番</label>
+            </div>
+            <div>
+                <label><input type="checkbox" id="ac-follower" name="roles" value="ac-follower"> AC主義者</label>
+            </div>
+            <div>
+                <label><input type="checkbox" id="bug" name="roles" value="bug"> バグ</label>
+            </div>
+        </div>
+
+        <!-- 決定ボタン -->
+        <button type="submit">決定</button>
+    </form>
+
+    <script>
+        // フォーム送信時の処理
+        document.getElementById("settings-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            // 入力データの取得
+            const playerCount = document.getElementById("player-count").value;
+            const gnosiaCount = document.getElementById("gnosia-count").value;
+            const selectedRoles = Array.from(document.querySelectorAll('input[name="roles"]:checked')).map(input => input.value);
+
+            // 確認用アラート
+            alert(`設定内容:\n乗員人数: ${playerCount}\nグノーシア: ${gnosiaCount}人\n選択された役職: ${selectedRoles.join(", ")}`);
+        });
+    </script>
+</body>
+</html>
