@@ -30,8 +30,7 @@
         <div class="settings">
             <label for="player-count">乗員人数:</label>
             <select id="player-count" name="player-count">
-                <!-- 最大15人まで選択可能 -->
-                ${[...Array(15).keys()].map(i => `<option value="${i + 1}">${i + 1} 人</option>`).join('')}
+                <!-- JavaScriptで動的に最大15人まで選択肢を生成 -->
             </select>
         </div>
 
@@ -90,6 +89,15 @@
     </form>
 
     <script>
+        // 乗員人数の選択肢を動的に生成
+        const playerCountSelect = document.getElementById("player-count");
+        for (let i = 1; i <= 15; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.textContent = `${i} 人`;
+            playerCountSelect.appendChild(option);
+        }
+
         // フォーム送信時の処理
         document.getElementById("settings-form").addEventListener("submit", function(event) {
             event.preventDefault();
