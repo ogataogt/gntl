@@ -1,136 +1,113 @@
-# Step 1: Basic HTML and CSS structure creation for the character list interface
-# Creating a static example of the layout with simple HTML and CSS for rendering
-from IPython.display import display, HTML
-
-html_content = """
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>人狼推理支援ツール</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .character-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        .character-card {
-            border: 2px solid #ccc;
-            border-radius: 10px;
-            background-color: #fff;
-            text-align: center;
-            padding: 10px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .character-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .character-card img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin-bottom: 10px;
-        }
-        .character-status {
-            margin-top: 5px;
-            font-weight: bold;
-        }
-        .status-safe {
-            color: blue;
-        }
-        .status-danger {
-            color: red;
-        }
-        .status-unknown {
-            color: gray;
-        }
-        .actions {
-            text-align: center;
-            margin-top: 20px;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: #fff;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>グノーシア推理補助ツール</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .header {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 10px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      padding: 10px;
+    }
+    .card {
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+    .card.safe {
+      background: lightblue;
+    }
+    .card.danger {
+      background: lightcoral;
+    }
+    .card.unknown {
+      background: #f4f4f4;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background: white;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    }
+    button {
+      padding: 10px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #555;
+    }
+  </style>
 </head>
 <body>
-    <h1>人狼推理支援ツール</h1>
-    <div class="character-grid">
-        <div class="character-card" id="character1" onclick="updateStatus('character1')">
-            <img src="https://via.placeholder.com/80" alt="クリス">
-            <div>クリス</div>
-            <div class="character-status status-unknown">不明</div>
-        </div>
-        <div class="character-card" id="character2" onclick="updateStatus('character2')">
-            <img src="https://via.placeholder.com/80" alt="ジェシカ">
-            <div>ジェシカ</div>
-            <div class="character-status status-unknown">不明</div>
-        </div>
-        <div class="character-card" id="character3" onclick="updateStatus('character3')">
-            <img src="https://via.placeholder.com/80" alt="サンドラ">
-            <div>サンドラ</div>
-            <div class="character-status status-unknown">不明</div>
-        </div>
-    </div>
-    <div class="actions">
-        <button onclick="saveProgress()">進行を保存</button>
-        <button onclick="loadProgress()">進行をロード</button>
-    </div>
+  <div class="header">
+    <h1>グノーシア推理補助ツール</h1>
+  </div>
+  <div class="controls">
+    <button id="prevDay">前のDay</button>
+    <span id="dayCounter">Day 1</span>
+    <button id="nextDay">次のDay</button>
+  </div>
+  <div class="grid" id="characterGrid">
+    <!-- キャラクターカード -->
+  </div>
+  <script>
+    const maxCharacters = 15;
+    const roles = { unknown: "不明", safe: "人間", danger: "グノーシア" };
+    let currentDay = 1;
 
-    <script>
-        function updateStatus(id) {
-            const card = document.getElementById(id);
-            const statusDiv = card.querySelector('.character-status');
-            if (statusDiv.classList.contains('status-unknown')) {
-                statusDiv.textContent = '安全';
-                statusDiv.className = 'character-status status-safe';
-            } else if (statusDiv.classList.contains('status-safe')) {
-                statusDiv.textContent = '危険';
-                statusDiv.className = 'character-status status-danger';
-            } else {
-                statusDiv.textContent = '不明';
-                statusDiv.className = 'character-status status-unknown';
-            }
-        }
+    // キャラクター生成
+    const grid = document.getElementById("characterGrid");
+    for (let i = 1; i <= maxCharacters; i++) {
+      const card = document.createElement("div");
+      card.classList.add("card", "unknown");
+      card.textContent = `キャラ${i}`;
+      card.dataset.status = "unknown";
+      card.addEventListener("click", () => {
+        // 状態を切り替える
+        const currentStatus = card.dataset.status;
+        const newStatus = currentStatus === "unknown" ? "safe" :
+                          currentStatus === "safe" ? "danger" : "unknown";
+        card.dataset.status = newStatus;
+        card.className = `card ${newStatus}`;
+        card.textContent = `キャラ${i} (${roles[newStatus]})`;
+      });
+      grid.appendChild(card);
+    }
 
-        function saveProgress() {
-            alert('進行状況が保存されました！ (仮実装)');
-        }
-
-        function loadProgress() {
-            alert('保存した進行をロードしました！ (仮実装)');
-        }
-    </script>
+    // Day切り替え
+    const dayCounter = document.getElementById("dayCounter");
+    document.getElementById("prevDay").addEventListener("click", () => {
+      if (currentDay > 1) {
+        currentDay--;
+        dayCounter.textContent = `Day ${currentDay}`;
+      }
+    });
+    document.getElementById("nextDay").addEventListener("click", () => {
+      currentDay++;
+      dayCounter.textContent = `Day ${currentDay}`;
+    });
+  </script>
 </body>
 </html>
-"""
-
-# Display the HTML content
-display(HTML(html_content))
