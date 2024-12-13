@@ -35,6 +35,29 @@
             </select>
         </div>
 
+        <!-- キャラクター選択 -->
+        <div class="settings">
+            <p>キャラクターを選択してください:</p>
+            <select id="character-names" name="character-names" multiple>
+                <option value="自分">自分</option>
+                <option value="セツ">セツ</option>
+                <option value="SQ">SQ</option>
+                <option value="ジナ">ジナ</option>
+                <option value="ラキオ">ラキオ</option>
+                <option value="オトメ">オトメ</option>
+                <option value="沙明">沙明</option>
+                <option value="ジョナス">ジョナス</option>
+                <option value="ククルシカ">ククルシカ</option>
+                <option value="コメット">コメット</option>
+                <option value="夕里子">夕里子</option>
+                <option value="シピ">シピ</option>
+                <option value="ステラ">ステラ</option>
+                <option value="しげみち">しげみち</option>
+                <option value="レムナン">レムナン</option>
+            </select>
+            <p>※複数選択する場合はCtrl（Windows）またはCommand（Mac）を押しながら選択してください。</p>
+        </div>
+
         <!-- 役職と人数の設定 -->
         <div class="settings">
             <p>役職を設定してください:</p>
@@ -73,11 +96,12 @@
 
             // 入力データの取得
             const playerCount = document.getElementById("player-count").value;
+            const selectedCharacters = Array.from(document.getElementById("character-names").selectedOptions).map(option => option.value);
             const gnosiaCount = document.getElementById("gnosia-count").value;
             const selectedRoles = Array.from(document.querySelectorAll('input[name="roles"]:checked')).map(input => input.value);
 
             // 確認用アラート
-            alert(`設定内容:\n乗員人数: ${playerCount}\nグノーシア: ${gnosiaCount}人\n選択された役職: ${selectedRoles.join(", ")}`);
+            alert(`設定内容:\n乗員人数: ${playerCount}\n選択されたキャラクター: ${selectedCharacters.join(", ")}\nグノーシア: ${gnosiaCount}人\n選択された役職: ${selectedRoles.join(", ")}`);
         });
     </script>
 </body>
