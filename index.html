@@ -104,29 +104,6 @@
         </select>
     </div>
 
-    <!-- キャラクター選択 -->
-    <div class="settings">
-        <p>キャラクターを選択してください:</p>
-        <select id="character-names" name="character-names" multiple>
-            <option value="自分">自分</option>
-            <option value="セツ">セツ</option>
-            <option value="SQ">SQ</option>
-            <option value="ジナ">ジナ</option>
-            <option value="ラキオ">ラキオ</option>
-            <option value="オトメ">オトメ</option>
-            <option value="沙明">沙明</option>
-            <option value="ジョナス">ジョナス</option>
-            <option value="ククルシカ">ククルシカ</option>
-            <option value="コメット">コメット</option>
-            <option value="夕里子">夕里子</option>
-            <option value="シピ">シピ</option>
-            <option value="ステラ">ステラ</option>
-            <option value="しげみち">しげみち</option>
-            <option value="レムナン">レムナン</option>
-        </select>
-        <p>※複数選択する場合はCtrl（Windows）またはCommand（Mac）を押しながら選択してください。</p>
-    </div>
-
     <!-- 役職設定 -->
     <div class="settings">
         <p>役職を設定してください:</p>
@@ -206,8 +183,24 @@
             playerCountSelect.appendChild(option);
         }
 
+        // 初期状態のデータを取得して反映
+        const savedData = JSON.parse(localStorage.getItem('gameData')) || {};
+
+        if (savedData.playerCount) {
+            playerCountSelect.value = savedData.playerCount;
+        }
+
+        // 役職設定の復元
+        const roles = ['engineer', 'doctor', 'guardian-angel', 'guard', 'ac-follower', 'bug'];
+        roles.forEach(role => {
+            const checkbox = document.getElementById(role);
+            if (savedData.roles && savedData.roles.includes(role)) {
+                checkbox.checked = true;
+            }
+        });
+
         // デイ切り替え機能
-        let currentDay = 1;
+        let currentDay = savedData.currentDay || 1;
         const currentDayElement = document.getElementById("current-day");
         const prevDayButton = document.getElementById("prev-day");
         const nextDayButton = document.getElementById("next-day");
@@ -230,33 +223,38 @@
             // 他のデイ毎の処理をここで更新（グノーシア判定や役職カミングアウトなど）
         }
 
-        // 役職カミングアウトのテーブル
+        // 役職カミングアウトテーブルの設定
         const roleRevealTable = document.getElementById("role-reveal-table").getElementsByTagName('tbody')[0];
-        const gnosisTable = document.getElementById("gnosia-table").getElementsByTagName('tbody')[0];
 
-        // 設定保存
-        const characterNamesSelect = document.getElementById("character-names");
-        const rolesCheckboxes = document.querySelectorAll('input[name="roles"]');
+        // グノーシア判定テーブルの設定
+        const gnosisTable = document.getElementById("gnosia-table").getElementsByTagName('tbody')[0];
 
         // フォーム送信時の処理
         document.getElementById("settings-form").addEventListener("submit", function(event) {
             event.preventDefault();
 
             // 入力データの取得
-            const selectedCharacters = Array.from(characterNamesSelect.selectedOptions).map(option => option.value);
-            const selectedRoles = Array.from(rolesCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
+            const selectedRoles = Array.from(document.querySelectorAll('input[name="roles"]:checked')).map(input => input.value);
+            const playerCount = playerCountSelect.value;
 
-            // 設定を保存し、テーブルに表示
-            roleRevealTable.innerHTML = '';  // リセット
-            gnosisTable.innerHTML = '';  // リセット
+            // 保存しておくデータ
+            const gameData = {
+                playerCount: playerCount,
+                roles: selectedRoles,
+                currentDay: currentDay
+            };
 
-            selectedCharacters.forEach(character => {
-                const roleRow = roleRevealTable.insertRow();
-                const nameCell = roleRow.insertCell(0);
-                const roleCell = roleRow.insertCell(1);
-                nameCell.textContent = character;
+            localStorage.setItem('gameData', JSON.stringify(gameData));
 
-                // 役職の選択肢を動的に追加
+            // 役職カミングアウトテーブルを設定
+            const characters = ['自分', 'セツ', 'SQ', 'ジナ', 'ラキオ'];  // 仮のキャラクターリスト
+            roleRevealTable.innerHTML = '';  // テーブルをリセット
+            characters.forEach(character => {
+                const row = roleRevealTable.insertRow();
+                const characterCell = row.insertCell(0);
+                const roleCell = row.insertCell(1);
+                characterCell.textContent = character;
+
                 const roleSelect = document.createElement('select');
                 roleSelect.innerHTML = `
                     <option value="">選択</option>
@@ -265,26 +263,29 @@
                     <option value="guard">留守番</option>
                 `;
                 roleCell.appendChild(roleSelect);
-                
+
                 roleSelect.addEventListener("change", function() {
                     const role = roleSelect.value;
                     if (role === "engineer") {
-                        roleRow.style.backgroundColor = "lightblue";
+                        row.style.backgroundColor = "lightblue";
                     } else if (role === "doctor") {
-                        roleRow.style.backgroundColor = "lightcyan";
+                        row.style.backgroundColor = "lightcyan";
                     } else if (role === "guard") {
-                        roleRow.style.backgroundColor = "yellow";
+                        row.style.backgroundColor = "yellow";
                     } else {
-                        roleRow.style.backgroundColor = "";
+                        row.style.backgroundColor = "";
                     }
                 });
+            });
 
-                // グノーシア判定
-                const gnosisRow = gnosisTable.insertRow();
-                const nameCellGnosis = gnosisRow.insertCell(0);
-                const judgmentCellGnosis = gnosisRow.insertCell(1);
-                nameCellGnosis.textContent = character;
-                judgmentCellGnosis.innerHTML = `<span class="toggle-cell" onclick="toggleGnosiaStatus(this)">不明</span>`;
+            // グノーシア判定テーブルの設定
+            gnosisTable.innerHTML = '';  // テーブルをリセット
+            characters.forEach(character => {
+                const row = gnosisTable.insertRow();
+                const characterCell = row.insertCell(0);
+                const judgmentCell = row.insertCell(1);
+                characterCell.textContent = character;
+                judgmentCell.innerHTML = `<span class="toggle-cell" onclick="toggleGnosiaStatus(this)">不明</span>`;
             });
         });
 
