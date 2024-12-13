@@ -19,6 +19,46 @@
             display: block;
             margin-bottom: 5px;
         }
+        .result {
+            margin-top: 20px;
+            border-top: 2px solid #ccc;
+            padding-top: 15px;
+        }
+        .result p {
+            font-weight: bold;
+        }
+        .result ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .result ul li {
+            margin-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        .highlight-engineer {
+            background-color: lightblue;
+        }
+        .highlight-doctor {
+            background-color: lightcyan;
+        }
+        .highlight-guard {
+            background-color: yellow;
+        }
+        .toggle-cell {
+            cursor: pointer;
+            width: 50px;
+        }
     </style>
 </head>
 <body>
@@ -88,6 +128,70 @@
         <button type="submit">決定</button>
     </form>
 
+    <div id="result" class="result" style="display:none;">
+        <h2>設定内容</h2>
+        <p>以下の設定が適用されました:</p>
+        <ul>
+            <li><strong>乗員人数:</strong> <span id="result-player-count"></span></li>
+            <li><strong>選択されたキャラクター:</strong> <span id="result-characters"></span></li>
+            <li><strong>グノーシア人数:</strong> <span id="result-gnosia-count"></span></li>
+            <li><strong>選択された役職:</strong> <span id="result-roles"></span></li>
+        </ul>
+    </div>
+
+    <!-- 役職カミングアウトテーブル -->
+    <h2>役職カミングアウト</h2>
+    <table id="role-reveal-table">
+        <thead>
+            <tr>
+                <th>キャラクター名</th>
+                <th>役職</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- JavaScriptで生成 -->
+        </tbody>
+    </table>
+
+    <!-- グノーシア判定表 -->
+    <h2>デイ毎のグノーシア判定</h2>
+    <table id="gnosia-table">
+        <thead>
+            <tr>
+                <th>キャラクター名</th>
+                <th>誰がグノーシアか？</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- JavaScriptで生成 -->
+        </tbody>
+    </table>
+
+    <!-- エンジニア・ドクター判定 -->
+    <h2>エンジニア・ドクター候補の判定</h2>
+    <table id="role-candidate-table">
+        <thead>
+            <tr>
+                <th>キャラクター名</th>
+                <th>判定</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- JavaScriptで生成 -->
+        </tbody>
+    </table>
+
+    <!-- コールドスリープ者と襲撃犠牲者 -->
+    <h2>デイ毎のコールドスリープ者と襲撃犠牲者</h2>
+    <div>
+        <label for="cold-sleep">コールドスリープ者:</label>
+        <input type="text" id="cold-sleep" placeholder="キャラクター名を入力">
+    </div>
+    <div>
+        <label for="attack-victim">襲撃犠牲者:</label>
+        <input type="text" id="attack-victim" placeholder="キャラクター名を入力">
+    </div>
+
     <script>
         // 乗員人数の選択肢を動的に生成
         const playerCountSelect = document.getElementById("player-count");
@@ -97,6 +201,11 @@
             option.textContent = `${i} 人`;
             playerCountSelect.appendChild(option);
         }
+
+        // 役職カミングアウトテーブルを生成
+        const roleRevealTable = document.getElementById("role-reveal-table").getElementsByTagName('tbody')[0];
+        const gnosisTable = document.getElementById("gnosia-table").getElementsByTagName('tbody')[0];
+        const roleCandidateTable = document.getElementById("role-candidate-table").getElementsByTagName('tbody')[0];
 
         // フォーム送信時の処理
         document.getElementById("settings-form").addEventListener("submit", function(event) {
@@ -108,9 +217,63 @@
             const gnosiaCount = document.getElementById("gnosia-count").value;
             const selectedRoles = Array.from(document.querySelectorAll('input[name="roles"]:checked')).map(input => input.value);
 
-            // 確認用アラート
-            alert(`設定内容:\n乗員人数: ${playerCount}\n選択されたキャラクター: ${selectedCharacters.join(", ")}\nグノーシア: ${gnosiaCount}人\n選択された役職: ${selectedRoles.join(", ")}`);
+            // 結果を表示
+            document.getElementById("result-player-count").textContent = `${playerCount} 人`;
+            document.getElementById("result-characters").textContent = selectedCharacters.join(", ");
+            document.getElementById("result-gnosia-count").textContent = `${gnosiaCount} 人`;
+            document.getElementById("result-roles").textContent = selectedRoles.join(", ");
+
+            document.getElementById("result").style.display = "block";
+
+            // 役職カミングアウトテーブルの設定
+            selectedCharacters.forEach(character => {
+                const row = roleRevealTable.insertRow();
+                const characterCell = row.insertCell(0);
+                const roleCell = row.insertCell(1);
+                characterCell.textContent = character;
+                roleCell.innerHTML = `<input type="text" class="role-input" placeholder="役職">`;
+            });
+
+            // グノーシア判定表の設定
+            selectedCharacters.forEach(character => {
+                const row = gnosisTable.insertRow();
+                const characterCell = row.insertCell(0);
+                const judgmentCell = row.insertCell(1);
+                characterCell.textContent = character;
+                judgmentCell.innerHTML = `<span class="toggle-cell" onclick="toggleGnosiaStatus(this)">不明</span>`;
+            });
+
+            // エンジニア・ドクター候補の判定
+            selectedCharacters.forEach(character => {
+                const row = roleCandidateTable.insertRow();
+                const characterCell = row.insertCell(0);
+                const judgmentCell = row.insertCell(1);
+                characterCell.textContent = character;
+                judgmentCell.innerHTML = `<span class="toggle-cell" onclick="toggleRoleStatus(this)">不明</span>`;
+            });
         });
+
+        // グノーシア判定のトグル処理
+        function toggleGnosiaStatus(cell) {
+            if (cell.textContent === '不明') {
+                cell.textContent = '○';
+            } else if (cell.textContent === '○') {
+                cell.textContent = '●';
+            } else {
+                cell.textContent = '不明';
+            }
+        }
+
+        // 役職判定のトグル処理
+        function toggleRoleStatus(cell) {
+            if (cell.textContent === '不明') {
+                cell.textContent = '○';
+            } else if (cell.textContent === '○') {
+                cell.textContent = '●';
+            } else {
+                cell.textContent = '不明';
+            }
+        }
     </script>
 </body>
 </html>
