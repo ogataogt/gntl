@@ -7,192 +7,235 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 10px;
+            margin: 20px;
             padding: 0;
-            background-color: #f7f7f7;
+            background-color: #f8f8f8;
         }
-        .settings {
-            margin-bottom: 15px;
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
         }
-        .settings div {
-            margin-bottom: 10px;
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
         }
-        label {
-            font-size: 14px;
-            margin-bottom: 5px;
+        .section {
+            margin-bottom: 30px;
         }
-        .result {
-            margin-top: 20px;
-            border-top: 2px solid #ccc;
-            padding-top: 15px;
-            display: none;
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
         }
-        .result p {
-            font-weight: bold;
-        }
-        .result ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        .result ul li {
-            margin-bottom: 5px;
+        .button:disabled {
+            background-color: #ddd;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ccc;
         }
         th, td {
             padding: 10px;
             text-align: center;
-            font-size: 14px;
+            border: 1px solid #ddd;
         }
-        .highlight-engineer {
+        th {
+            background-color: #f2f2f2;
+        }
+        .human {
             background-color: lightblue;
         }
-        .highlight-doctor {
-            background-color: lightcyan;
+        .gnosia {
+            background-color: lightcoral;
         }
-        .highlight-guard {
-            background-color: yellow;
+        .unknown {
+            background-color: lightgray;
         }
-        .highlight-role {
-            cursor: pointer;
+        .day-header {
+            background-color: #eee;
+            font-weight: bold;
         }
-        .highlight-role:hover {
-            background-color: #e0e0e0;
-        }
-        .toggle-cell {
-            cursor: pointer;
-            padding: 5px 10px;
-            font-size: 14px;
-        }
-        .toggle-cell:hover {
-            background-color: #e0e0e0;
-        }
-        .day-switch {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .day-switch button {
-            padding: 5px 10px;
-            font-size: 14px;
-            cursor: pointer;
-            background-color: #4CAF50;
+        .day-button {
+            background-color: #2196F3;
             color: white;
             border: none;
-            border-radius: 5px;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
         }
-        .day-switch button:hover {
-            background-color: #45a049;
+        .day-button:disabled {
+            background-color: #ddd;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        .suggestion {
+            margin-top: 20px;
+            background-color: #ffe600;
+            padding: 10px;
+            border: 1px solid #ccc;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>グノーシア推理補助ツール</h1>
-    <p>ゲーム進行に合わせて設定を行ってください。</p>
 
-    <!-- 乗員人数設定 -->
-    <div class="settings">
-        <label for="player-count">乗員人数:</label>
-        <select id="player-count" name="player-count">
-            <option value="1">1人</option>
-            <option value="2">2人</option>
-            <option value="3">3人</option>
-            <!-- ここで人数選択 -->
-        </select>
-    </div>
+    <div class="container">
+        <h1>グノーシア推理補助ツール</h1>
 
-    <!-- キャラクター選択 -->
-    <div class="settings">
-        <p>キャラクターを選択してください:</p>
-        <select id="character-names" name="character-names" multiple>
-            <option value="自分">自分</option>
-            <option value="セツ">セツ</option>
-            <option value="SQ">SQ</option>
-            <option value="ジナ">ジナ</option>
-            <option value="ラキオ">ラキオ</option>
-            <option value="オトメ">オトメ</option>
-            <option value="沙明">沙明</option>
-            <option value="ジョナス">ジョナス</option>
-            <option value="ククルシカ">ククルシカ</option>
-            <option value="コメット">コメット</option>
-            <option value="夕里子">夕里子</option>
-            <option value="シピ">シピ</option>
-            <option value="ステラ">ステラ</option>
-            <option value="しげみち">しげみち</option>
-            <option value="レムナン">レムナン</option>
-        </select>
-    </div>
+        <!-- キャラ視点での判定 -->
+        <div class="section">
+            <h2>キャラクターの視点</h2>
+            <label for="character-select">キャラクターを選択:</label>
+            <select id="character-select">
+                <option value="自分">自分</option>
+                <option value="セツ">セツ</option>
+                <option value="SQ">SQ</option>
+                <option value="ジナ">ジナ</option>
+                <option value="ラキオ">ラキオ</option>
+                <option value="オトメ">オトメ</option>
+                <option value="沙明">沙明</option>
+                <option value="ジョナス">ジョナス</option>
+                <option value="ククルシカ">ククルシカ</option>
+                <option value="コメット">コメット</option>
+                <option value="夕里子">夕里子</option>
+                <option value="シピ">シピ</option>
+                <option value="ステラ">ステラ</option>
+                <option value="しげみち">しげみち</option>
+                <option value="レムナン">レムナン</option>
+            </select>
 
-    <!-- 日数切り替えボタン -->
-    <div class="day-switch">
-        <button id="prev-day" disabled>前のデイ</button>
-        <span id="current-day">DAY 1</span>
-        <button id="next-day">次のデイ</button>
-    </div>
+            <h3>このキャラクターの視点で記録:</h3>
+            <div>
+                <button class="button" id="mark-human">人間（○）</button>
+                <button class="button" id="mark-gnosia">グノーシア（●）</button>
+                <button class="button" id="mark-unknown">不明（？）</button>
+            </div>
+        </div>
 
-    <!-- 役職カミングアウトテーブル -->
-    <h2>役職カミングアウト</h2>
-    <table id="role-reveal-table">
-        <thead>
-            <tr>
-                <th>キャラクター名</th>
-                <th>役職</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- 動的に行を追加 -->
-        </tbody>
-    </table>
+        <!-- Dayごとの状況 -->
+        <div class="section">
+            <h2>Dayごとの状況記録</h2>
+            <button class="day-button" id="next-day">次のDay</button>
+            <div id="day-status"></div>
+        </div>
 
-    <!-- グノーシア判定テーブル -->
-    <h2>デイ毎のグノーシア判定</h2>
-    <table id="gnosia-table">
-        <thead>
-            <tr>
-                <th>キャラクター名</th>
-                <th>判定</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- 動的に行を追加 -->
-        </tbody>
-    </table>
+        <!-- まとめテーブル -->
+        <div class="section">
+            <h2>キャラクター視点の判定結果</h2>
+            <table id="status-table">
+                <thead>
+                    <tr class="day-header">
+                        <th>キャラクター名</th>
+                        <th>Day 1</th>
+                        <th>Day 2</th>
+                        <th>Day 3</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>自分</td>
+                        <td id="自分-day1" class="unknown"></td>
+                        <td id="自分-day2" class="unknown"></td>
+                        <td id="自分-day3" class="unknown"></td>
+                    </tr>
+                    <tr>
+                        <td>セツ</td>
+                        <td id="セツ-day1" class="unknown"></td>
+                        <td id="セツ-day2" class="unknown"></td>
+                        <td id="セツ-day3" class="unknown"></td>
+                    </tr>
+                    <tr>
+                        <td>SQ</td>
+                        <td id="SQ-day1" class="unknown"></td>
+                        <td id="SQ-day2" class="unknown"></td>
+                        <td id="SQ-day3" class="unknown"></td>
+                    </tr>
+                    <!-- 他のキャラクターも同様に追加 -->
+                </tbody>
+            </table>
+        </div>
 
-    <!-- エンジニア・ドクター候補メモ -->
-    <h2>エンジニア・ドクター候補の判定メモ</h2>
-    <table id="role-candidate-table">
-        <thead>
-            <tr>
-                <th>キャラクター名</th>
-                <th>判定</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- 動的に行を追加 -->
-        </tbody>
-    </table>
-
-    <!-- その他の設定 -->
-    <h2>デイ毎の設定</h2>
-    <div>
-        <label for="cold-sleep">コールドスリープ者:</label>
-        <input type="text" id="cold-sleep" placeholder="キャラクター名">
-    </div>
-    <div>
-        <label for="attack-victim">襲撃犠牲者:</label>
-        <input type="text" id="attack-victim" placeholder="キャラクター名">
+        <!-- 推理補助 -->
+        <div class="section">
+            <h2>推理補助</h2>
+            <div id="suggestions" class="suggestion"></div>
+        </div>
     </div>
 
     <script>
-        // データを保存し、更新する処理を記述しています。
-        // 必要な情報をまとめ、ゲーム進行に合わせた自動更新機能を追加しました。
-        // これはあくまでサンプルコードで、詳細な論理的な判定やユーザーインターフェースは実装しています。
+        let currentDay = 1;
+
+        // 役職情報（エンジニア、ドクターなど）
+        const roles = {
+            "エンジニア": ["自分", "セツ"],  // 仮定の例
+            "ドクター": ["SQ", "ジナ"],      // 仮定の例
+            "守護天使": ["ラキオ", "オトメ"] // 仮定の例
+        };
+
+        // キャラクターの視点で記録
+        document.getElementById("mark-human").addEventListener("click", function() {
+            const character = document.getElementById("character-select").value;
+            document.getElementById(`${character}-day${currentDay}`).classList.add("human");
+            document.getElementById(`${character}-day${currentDay}`).classList.remove("gnosia", "unknown");
+            updateDayStatus();
+            updateSuggestions();
+        });
+
+        document.getElementById("mark-gnosia").addEventListener("click", function() {
+            const character = document.getElementById("character-select").value;
+            document.getElementById(`${character}-day${currentDay}`).classList.add("gnosia");
+            document.getElementById(`${character}-day${currentDay}`).classList.remove("human", "unknown");
+            updateDayStatus();
+            updateSuggestions();
+        });
+
+        document.getElementById("mark-unknown").addEventListener("click", function() {
+            const character = document.getElementById("character-select").value;
+            document.getElementById(`${character}-day${currentDay}`).classList.add("unknown");
+            document.getElementById(`${character}-day${currentDay}`).classList.remove("human", "gnosia");
+            updateDayStatus();
+            updateSuggestions();
+        });
+
+        // 次のDayボタン
+        document.getElementById("next-day").addEventListener("click", function() {
+            if (currentDay < 3) {
+                currentDay++;
+                updateDayStatus();
+                updateSuggestions();
+            }
+        });
+
+        // Dayの状態表示
+        function updateDayStatus() {
+            document.getElementById("day-status").innerText = `現在はDay ${currentDay}です。`;
+            const buttons = document.querySelectorAll('.day-button');
+            buttons.forEach(button => button.disabled = currentDay >= 3);
+        }
+
+        // 推理補助
+        function updateSuggestions() {
+            let suggestions = "推理補助:\n";
+            for (const [role, characters] of Object.entries(roles)) {
+                const roleStatus = characters.map(character => {
+                    const status = document.getElementById(`${character}-day${currentDay}`).className;
+                    return `${character}は${status === 'human' ? '人間' : status === 'gnosia' ? 'グノーシア' : '不明'}`;
+                }).join(", ");
+                suggestions += `${role}: ${roleStatus}\n`;
+            }
+            document.getElementById("suggestions").innerText = suggestions;
+        }
+
+        updateDayStatus();
+        updateSuggestions();
     </script>
+
 </body>
 </html>
