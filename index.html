@@ -7,149 +7,102 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-    }
-    .header {
-      background: #333;
-      color: white;
-      text-align: center;
-      padding: 10px;
     }
     .container {
-      padding: 20px;
+      padding: 10px;
     }
     .hidden {
       display: none;
     }
-    .grid {
+    .visible {
+      display: block;
+    }
+    .button {
+      margin: 5px;
+      padding: 10px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .button:disabled {
+      background-color: #ccc;
+    }
+    .character-list {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-bottom: 20px;
+      margin-top: 10px;
     }
-    .card {
-      background: white;
+    .character-item {
       padding: 10px;
+      border: 1px solid #ccc;
       border-radius: 5px;
       text-align: center;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-    }
-    button {
-      padding: 10px 20px;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #555;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>グノーシア推理補助ツール</h1>
-  </div>
-
-  <!-- 設定画面 -->
-  <div id="settingsScreen" class="container">
-    <h2>ゲーム設定</h2>
-    <label>
-      参加人数（自分以外）:
-      <input type="number" id="playerCount" min="1" max="15" value="1">
-    </label>
-    <h3>参加キャラクターを選択</h3>
-    <div class="grid" id="characterSelection">
-      <!-- キャラクターリストを動的に追加 -->
+  <div class="container">
+    <!-- 設定画面 -->
+    <div id="setup-screen" class="visible">
+      <h2>ゲーム設定</h2>
+      <label for="player-count">人数（1〜15人）:</label>
+      <input type="number" id="player-count" min="1" max="15" value="15"><br><br>
+      <h3>参加キャラクターを選択してください:</h3>
+      <div id="character-selection" class="character-list"></div>
+      <h3>役職を選択してください:</h3>
+      <label><input type="checkbox" id="role-gnosia"> グノーシア</label><br>
+      <label><input type="checkbox" id="role-engineer"> エンジニア</label><br>
+      <label><input type="checkbox" id="role-doctor"> ドクター</label><br>
+      <label><input type="checkbox" id="role-guard-duty"> 留守番</label><br>
+      <label><input type="checkbox" id="role-guardian-angel"> 守護天使</label><br>
+      <label><input type="checkbox" id="role-ac-follower"> AC主義者</label><br>
+      <label><input type="checkbox" id="role-bug"> バグ</label><br><br>
+      <button class="button" id="confirm-setup">設定確定</button>
     </div>
-    <h3>役職の設定</h3>
-    <label><input type="checkbox" id="roleEngineer"> エンジニア</label><br>
-    <label><input type="checkbox" id="roleDoctor"> ドクター</label><br>
-    <label><input type="checkbox" id="roleGuard"> 守護天使</label><br>
-    <label><input type="checkbox" id="roleBug"> バグ</label><br>
-    <label><input type="checkbox" id="roleAC"> AC主義者</label><br>
-    <label>グノーシアの人数: 
-      <input type="number" id="roleGnosiaCount" min="1" max="15" value="1">
-    </label><br>
-    <button id="startGame">設定確定</button>
-  </div>
 
-  <!-- DAY進行画面 -->
-  <div id="dayScreen" class="container hidden">
-    <h2 id="dayHeader">Day 1</h2>
-    <div class="grid" id="dayGrid">
-      <!-- キャラクターカードを動的に生成 -->
+    <!-- DAY進行画面 -->
+    <div id="day-progress-screen" class="hidden">
+      <h2>DAY進行</h2>
+      <div id="day-log"></div>
+      <button class="button" id="next-day">次のDAYへ</button>
     </div>
-    <button id="prevDay">前のDay</button>
-    <button id="nextDay">次のDay</button>
   </div>
 
   <script>
     // キャラクターリスト
-    const characterNames = [
-      "ククルシカ", "コメット", "ステラ", "シピ", "ジナ",
-      "セツ", "ラキオ", "シャーミン", "レムナン", "ユリコ",
-      "SQ", "オトメ", "チアキ", "ヨナス", "ロジック"
-    ];
+    const characters = ["セツ", "ジナ", "ラキオ", "SQ", "ステラ", "しげみち", "コメット", "シピ", "ククルシカ", "ジョナス", "オトメ", "夕里子", "沙明", "レムナン"];
+    const characterSelection = document.getElementById("character-selection");
 
-    // DOM要素取得
-    const settingsScreen = document.getElementById("settingsScreen");
-    const dayScreen = document.getElementById("dayScreen");
-    const playerCountInput = document.getElementById("playerCount");
-    const characterSelection = document.getElementById("characterSelection");
-    const dayGrid = document.getElementById("dayGrid");
-    const dayHeader = document.getElementById("dayHeader");
+    // 設定画面と進行画面の切り替え
+    const setupScreen = document.getElementById("setup-screen");
+    const dayProgressScreen = document.getElementById("day-progress-screen");
+    const confirmSetupButton = document.getElementById("confirm-setup");
+    const dayLog = document.getElementById("day-log");
+    const nextDayButton = document.getElementById("next-day");
 
-    // キャラクター選択画面の生成
-    characterNames.forEach((name, index) => {
-      const card = document.createElement("div");
-      card.classList.add("card");
-      card.textContent = name;
-      card.dataset.selected = "false";
-      card.addEventListener("click", () => {
-        card.dataset.selected = card.dataset.selected === "false" ? "true" : "false";
-        card.style.backgroundColor = card.dataset.selected === "true" ? "lightgreen" : "white";
-      });
-      characterSelection.appendChild(card);
+    // 初期化
+    characters.forEach(name => {
+      const div = document.createElement("div");
+      div.className = "character-item";
+      div.textContent = name;
+      characterSelection.appendChild(div);
     });
 
     // 設定確定ボタン
-    document.getElementById("startGame").addEventListener("click", () => {
-      const selectedCount = parseInt(playerCountInput.value, 10);
-      const selectedCharacters = Array.from(characterSelection.children)
-        .filter(card => card.dataset.selected === "true")
-        .map(card => card.textContent)
-        .slice(0, selectedCount);
-
-      // キャラクターカードを生成
-      dayGrid.innerHTML = "";
-      selectedCharacters.forEach(name => {
-        const card = document.createElement("div");
-        card.classList.add("card");
-        card.textContent = name;
-        dayGrid.appendChild(card);
-      });
-
-      // 画面遷移
-      settingsScreen.classList.add("hidden");
-      dayScreen.classList.remove("hidden");
+    confirmSetupButton.addEventListener("click", () => {
+      setupScreen.classList.add("hidden");
+      dayProgressScreen.classList.remove("hidden");
+      dayLog.innerHTML = "<p>ゲームが開始されました！</p>";
     });
 
-    // Day進行制御
-    let currentDay = 1;
-    document.getElementById("prevDay").addEventListener("click", () => {
-      if (currentDay > 1) {
-        currentDay--;
-        dayHeader.textContent = `Day ${currentDay}`;
-      }
-    });
-    document.getElementById("nextDay").addEventListener("click", () => {
-      currentDay++;
-      dayHeader.textContent = `Day ${currentDay}`;
+    // 次のDAYボタン
+    let dayCount = 1;
+    nextDayButton.addEventListener("click", () => {
+      dayLog.innerHTML += `<p>DAY ${++dayCount} の進行を開始します。</p>`;
     });
   </script>
 </body>
