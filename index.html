@@ -7,7 +7,9 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 10px;
+            padding: 0;
+            background-color: #f7f7f7;
         }
         .settings {
             margin-bottom: 15px;
@@ -16,13 +18,14 @@
             margin-bottom: 10px;
         }
         label {
-            display: block;
+            font-size: 14px;
             margin-bottom: 5px;
         }
         .result {
             margin-top: 20px;
             border-top: 2px solid #ccc;
             padding-top: 15px;
+            display: none;
         }
         .result p {
             font-weight: bold;
@@ -45,6 +48,7 @@
         th, td {
             padding: 10px;
             text-align: center;
+            font-size: 14px;
         }
         .highlight-engineer {
             background-color: lightblue;
@@ -55,88 +59,79 @@
         .highlight-guard {
             background-color: yellow;
         }
+        .highlight-role {
+            cursor: pointer;
+        }
+        .highlight-role:hover {
+            background-color: #e0e0e0;
+        }
         .toggle-cell {
             cursor: pointer;
-            width: 50px;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        .toggle-cell:hover {
+            background-color: #e0e0e0;
+        }
+        .day-switch {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .day-switch button {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .day-switch button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
     <h1>グノーシア推理補助ツール</h1>
-    <p>初期条件を設定してください。</p>
+    <p>ゲーム進行に合わせて設定を行ってください。</p>
 
-    <form id="settings-form">
-        <!-- 乗員人数設定 -->
-        <div class="settings">
-            <label for="player-count">乗員人数:</label>
-            <select id="player-count" name="player-count">
-                <!-- JavaScriptで動的に最大15人まで選択肢を生成 -->
-            </select>
+    <!-- 乗員人数設定 -->
+    <div class="settings">
+        <label for="player-count">乗員人数:</label>
+        <select id="player-count" name="player-count">
+            <!-- ここで人数選択 -->
+        </select>
+    </div>
+
+    <!-- 役職設定 -->
+    <div class="settings">
+        <p>役職を設定してください:</p>
+        <div>
+            <label><input type="checkbox" id="engineer" name="roles" value="engineer"> エンジニア</label>
         </div>
-
-        <!-- キャラクター選択 -->
-        <div class="settings">
-            <p>キャラクターを選択してください:</p>
-            <select id="character-names" name="character-names" multiple>
-                <option value="自分">自分</option>
-                <option value="セツ">セツ</option>
-                <option value="SQ">SQ</option>
-                <option value="ジナ">ジナ</option>
-                <option value="ラキオ">ラキオ</option>
-                <option value="オトメ">オトメ</option>
-                <option value="沙明">沙明</option>
-                <option value="ジョナス">ジョナス</option>
-                <option value="ククルシカ">ククルシカ</option>
-                <option value="コメット">コメット</option>
-                <option value="夕里子">夕里子</option>
-                <option value="シピ">シピ</option>
-                <option value="ステラ">ステラ</option>
-                <option value="しげみち">しげみち</option>
-                <option value="レムナン">レムナン</option>
-            </select>
-            <p>※複数選択する場合はCtrl（Windows）またはCommand（Mac）を押しながら選択してください。</p>
+        <div>
+            <label><input type="checkbox" id="doctor" name="roles" value="doctor"> ドクター</label>
         </div>
-
-        <!-- 役職と人数の設定 -->
-        <div class="settings">
-            <p>役職を設定してください:</p>
-            <div>
-                <label for="gnosia-count">グノーシア:</label>
-                <input type="number" id="gnosia-count" name="gnosia-count" min="0" max="15" value="1"> 人
-            </div>
-            <div>
-                <label><input type="checkbox" id="engineer" name="roles" value="engineer"> エンジニア</label>
-            </div>
-            <div>
-                <label><input type="checkbox" id="doctor" name="roles" value="doctor"> ドクター</label>
-            </div>
-            <div>
-                <label><input type="checkbox" id="guardian-angel" name="roles" value="guardian-angel"> 守護天使</label>
-            </div>
-            <div>
-                <label><input type="checkbox" id="guard" name="roles" value="guard"> 留守番</label>
-            </div>
-            <div>
-                <label><input type="checkbox" id="ac-follower" name="roles" value="ac-follower"> AC主義者</label>
-            </div>
-            <div>
-                <label><input type="checkbox" id="bug" name="roles" value="bug"> バグ</label>
-            </div>
+        <div>
+            <label><input type="checkbox" id="guardian-angel" name="roles" value="guardian-angel"> 守護天使</label>
         </div>
+        <div>
+            <label><input type="checkbox" id="guard" name="roles" value="guard"> 留守番</label>
+        </div>
+        <div>
+            <label><input type="checkbox" id="ac-follower" name="roles" value="ac-follower"> AC主義者</label>
+        </div>
+        <div>
+            <label><input type="checkbox" id="bug" name="roles" value="bug"> バグ</label>
+        </div>
+    </div>
 
-        <!-- 決定ボタン -->
-        <button type="submit">決定</button>
-    </form>
-
-    <div id="result" class="result" style="display:none;">
-        <h2>設定内容</h2>
-        <p>以下の設定が適用されました:</p>
-        <ul>
-            <li><strong>乗員人数:</strong> <span id="result-player-count"></span></li>
-            <li><strong>選択されたキャラクター:</strong> <span id="result-characters"></span></li>
-            <li><strong>グノーシア人数:</strong> <span id="result-gnosia-count"></span></li>
-            <li><strong>選択された役職:</strong> <span id="result-roles"></span></li>
-        </ul>
+    <!-- 日数切り替えボタン -->
+    <div class="day-switch">
+        <button id="prev-day" disabled>前のデイ</button>
+        <span id="current-day">DAY 1</span>
+        <button id="next-day">次のデイ</button>
     </div>
 
     <!-- 役職カミングアウトテーブル -->
@@ -149,27 +144,13 @@
             </tr>
         </thead>
         <tbody>
-            <!-- JavaScriptで生成 -->
+            <!-- 動的に行を追加 -->
         </tbody>
     </table>
 
-    <!-- グノーシア判定表 -->
+    <!-- グノーシア判定テーブル -->
     <h2>デイ毎のグノーシア判定</h2>
     <table id="gnosia-table">
-        <thead>
-            <tr>
-                <th>キャラクター名</th>
-                <th>誰がグノーシアか？</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- JavaScriptで生成 -->
-        </tbody>
-    </table>
-
-    <!-- エンジニア・ドクター判定 -->
-    <h2>エンジニア・ドクター候補の判定</h2>
-    <table id="role-candidate-table">
         <thead>
             <tr>
                 <th>キャラクター名</th>
@@ -177,19 +158,19 @@
             </tr>
         </thead>
         <tbody>
-            <!-- JavaScriptで生成 -->
+            <!-- 動的に行を追加 -->
         </tbody>
     </table>
 
-    <!-- コールドスリープ者と襲撃犠牲者 -->
-    <h2>デイ毎のコールドスリープ者と襲撃犠牲者</h2>
+    <!-- その他の設定 -->
+    <h2>デイ毎の設定</h2>
     <div>
         <label for="cold-sleep">コールドスリープ者:</label>
-        <input type="text" id="cold-sleep" placeholder="キャラクター名を入力">
+        <input type="text" id="cold-sleep" placeholder="キャラクター名">
     </div>
     <div>
         <label for="attack-victim">襲撃犠牲者:</label>
-        <input type="text" id="attack-victim" placeholder="キャラクター名を入力">
+        <input type="text" id="attack-victim" placeholder="キャラクター名">
     </div>
 
     <script>
@@ -202,70 +183,88 @@
             playerCountSelect.appendChild(option);
         }
 
-        // 役職カミングアウトテーブルを生成
+        // デイ切り替え機能
+        let currentDay = 1;
+        const currentDayElement = document.getElementById("current-day");
+        const prevDayButton = document.getElementById("prev-day");
+        const nextDayButton = document.getElementById("next-day");
+
+        nextDayButton.addEventListener("click", () => {
+            currentDay++;
+            updateDay();
+        });
+
+        prevDayButton.addEventListener("click", () => {
+            if (currentDay > 1) {
+                currentDay--;
+                updateDay();
+            }
+        });
+
+        function updateDay() {
+            currentDayElement.textContent = `DAY ${currentDay}`;
+            prevDayButton.disabled = currentDay === 1;
+            // 他のデイ毎の処理をここで更新（グノーシア判定や役職カミングアウトなど）
+        }
+
+        // 役職カミングアウトテーブルの設定
         const roleRevealTable = document.getElementById("role-reveal-table").getElementsByTagName('tbody')[0];
+
+        // グノーシア判定テーブルの設定
         const gnosisTable = document.getElementById("gnosia-table").getElementsByTagName('tbody')[0];
-        const roleCandidateTable = document.getElementById("role-candidate-table").getElementsByTagName('tbody')[0];
 
         // フォーム送信時の処理
         document.getElementById("settings-form").addEventListener("submit", function(event) {
             event.preventDefault();
 
             // 入力データの取得
-            const playerCount = document.getElementById("player-count").value;
-            const selectedCharacters = Array.from(document.getElementById("character-names").selectedOptions).map(option => option.value);
-            const gnosiaCount = document.getElementById("gnosia-count").value;
             const selectedRoles = Array.from(document.querySelectorAll('input[name="roles"]:checked')).map(input => input.value);
 
-            // 結果を表示
-            document.getElementById("result-player-count").textContent = `${playerCount} 人`;
-            document.getElementById("result-characters").textContent = selectedCharacters.join(", ");
-            document.getElementById("result-gnosia-count").textContent = `${gnosiaCount} 人`;
-            document.getElementById("result-roles").textContent = selectedRoles.join(", ");
-
-            document.getElementById("result").style.display = "block";
-
-            // 役職カミングアウトテーブルの設定
-            selectedCharacters.forEach(character => {
+            // 役職カミングアウトテーブルを設定
+            const characters = ['自分', 'セツ', 'SQ', 'ジナ', 'ラキオ'];  // 仮のキャラクターリスト
+            roleRevealTable.innerHTML = '';  // テーブルをリセット
+            characters.forEach(character => {
                 const row = roleRevealTable.insertRow();
                 const characterCell = row.insertCell(0);
                 const roleCell = row.insertCell(1);
                 characterCell.textContent = character;
-                roleCell.innerHTML = `<input type="text" class="role-input" placeholder="役職">`;
+
+                const roleSelect = document.createElement('select');
+                roleSelect.innerHTML = `
+                    <option value="">選択</option>
+                    <option value="engineer">エンジニア</option>
+                    <option value="doctor">ドクター</option>
+                    <option value="guard">留守番</option>
+                `;
+                roleCell.appendChild(roleSelect);
+
+                roleSelect.addEventListener("change", function() {
+                    const role = roleSelect.value;
+                    if (role === "engineer") {
+                        row.style.backgroundColor = "lightblue";
+                    } else if (role === "doctor") {
+                        row.style.backgroundColor = "lightcyan";
+                    } else if (role === "guard") {
+                        row.style.backgroundColor = "yellow";
+                    } else {
+                        row.style.backgroundColor = "";
+                    }
+                });
             });
 
-            // グノーシア判定表の設定
-            selectedCharacters.forEach(character => {
+            // グノーシア判定テーブルの設定
+            gnosisTable.innerHTML = '';  // テーブルをリセット
+            characters.forEach(character => {
                 const row = gnosisTable.insertRow();
                 const characterCell = row.insertCell(0);
                 const judgmentCell = row.insertCell(1);
                 characterCell.textContent = character;
                 judgmentCell.innerHTML = `<span class="toggle-cell" onclick="toggleGnosiaStatus(this)">不明</span>`;
             });
-
-            // エンジニア・ドクター候補の判定
-            selectedCharacters.forEach(character => {
-                const row = roleCandidateTable.insertRow();
-                const characterCell = row.insertCell(0);
-                const judgmentCell = row.insertCell(1);
-                characterCell.textContent = character;
-                judgmentCell.innerHTML = `<span class="toggle-cell" onclick="toggleRoleStatus(this)">不明</span>`;
-            });
         });
 
         // グノーシア判定のトグル処理
         function toggleGnosiaStatus(cell) {
-            if (cell.textContent === '不明') {
-                cell.textContent = '○';
-            } else if (cell.textContent === '○') {
-                cell.textContent = '●';
-            } else {
-                cell.textContent = '不明';
-            }
-        }
-
-        // 役職判定のトグル処理
-        function toggleRoleStatus(cell) {
             if (cell.textContent === '不明') {
                 cell.textContent = '○';
             } else if (cell.textContent === '○') {
