@@ -7,8 +7,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-    }
-    .container {
+      margin: 0;
       padding: 10px;
     }
     .hidden {
@@ -44,121 +43,106 @@
       cursor: pointer;
     }
     .character-item.selected {
-      background-color: #f0f8ff;
+      background-color: #4CAF50;
+      color: white;
     }
-    .log {
-      background-color: #f9f9f9;
-      padding: 10px;
-      border: 1px solid #ccc;
-      margin-top: 10px;
+    .role-color {
+      display: inline-block;
+      padding: 5px 10px;
+      margin: 5px;
+      border-radius: 5px;
     }
+    .role-gnosia { background-color: red; color: white; }
+    .role-human { background-color: blue; color: white; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- 設定画面 -->
-    <div id="setup-screen" class="visible">
-      <h2>ゲーム設定</h2>
-      <label for="player-count">人数（1〜15人）:</label>
-      <input type="number" id="player-count" min="1" max="15" value="15"><br><br>
-      <h3>参加キャラクターを選択してください:</h3>
-      <div id="character-selection" class="character-list"></div>
-      <h3>役職を選択してください:</h3>
-      <label for="gnosia-count">グノーシア人数:</label>
-      <input type="number" id="gnosia-count" min="1" max="15" value="2"><br>
-      <label><input type="checkbox" id="role-engineer"> エンジニア</label><br>
-      <label><input type="checkbox" id="role-doctor"> ドクター</label><br>
-      <label><input type="checkbox" id="role-guard-duty"> 留守番</label><br>
-      <label><input type="checkbox" id="role-guardian-angel"> 守護天使</label><br>
-      <label><input type="checkbox" id="role-ac-follower"> AC主義者</label><br>
-      <label><input type="checkbox" id="role-bug"> バグ</label><br><br>
-      <button class="button" id="confirm-setup">設定確定</button>
-    </div>
+  <div id="setup-screen" class="visible">
+    <h2>ゲーム設定</h2>
+    <label for="player-count">人数（1〜15人）:</label>
+    <input type="number" id="player-count" min="1" max="15" value="15"><br><br>
+    
+    <h3>参加キャラクターを選択してください:</h3>
+    <div id="character-selection" class="character-list"></div>
+    
+    <h3>役職を選択してください:</h3>
+    <label>グノーシア人数:</label>
+    <select id="gnosia-count">
+      <option value="1">1人</option>
+      <option value="2">2人</option>
+      <option value="3">3人</option>
+    </select><br>
+    <label><input type="checkbox" id="role-engineer"> エンジニア</label><br>
+    <label><input type="checkbox" id="role-doctor"> ドクター</label><br>
+    <label><input type="checkbox" id="role-guard-duty"> 留守番</label><br>
+    <label><input type="checkbox" id="role-guardian-angel"> 守護天使</label><br>
+    <label><input type="checkbox" id="role-ac-follower"> AC主義者</label><br>
+    <label><input type="checkbox" id="role-bug"> バグ</label><br><br>
+    <button class="button" id="confirm-setup">設定確定</button>
+  </div>
 
-    <!-- DAY進行画面 -->
-    <div id="day-progress-screen" class="hidden">
-      <h2>DAY進行</h2>
-      <div id="day-log" class="log"></div>
-      <button class="button" id="next-day">次のDAYへ</button>
-      <button class="button" id="save-game">進行状況を保存</button>
-      <button class="button" id="load-game">保存した状態をロード</button>
+  <div id="day-progress-screen" class="hidden">
+    <h2>DAY進行</h2>
+    <div id="day-log"></div>
+    <button class="button" id="save-progress">進行状況を保存</button>
+    <button class="button" id="load-progress">保存した進行状況をロード</button><br>
+    <button class="button" id="next-day">次のDAYへ</button>
+    <h3>役職カミングアウト</h3>
+    <div>
+      <span class="role-color role-gnosia">グノーシア</span>
+      <span class="role-color role-human">人間</span>
     </div>
   </div>
 
   <script>
     const characters = ["セツ", "ジナ", "ラキオ", "SQ", "ステラ", "しげみち", "コメット", "シピ", "ククルシカ", "ジョナス", "オトメ", "夕里子", "沙明", "レムナン"];
-    const selectedCharacters = new Set();
     const characterSelection = document.getElementById("character-selection");
 
-    // 設定画面と進行画面の切り替え
-    const setupScreen = document.getElementById("setup-screen");
-    const dayProgressScreen = document.getElementById("day-progress-screen");
-    const confirmSetupButton = document.getElementById("confirm-setup");
-    const dayLog = document.getElementById("day-log");
-    const nextDayButton = document.getElementById("next-day");
-    const saveGameButton = document.getElementById("save-game");
-    const loadGameButton = document.getElementById("load-game");
-
-    // キャラクター選択画面生成
+    // キャラクター選択リストを生成
     characters.forEach(name => {
       const div = document.createElement("div");
       div.className = "character-item";
       div.textContent = name;
       div.addEventListener("click", () => {
-        if (selectedCharacters.has(name)) {
-          selectedCharacters.delete(name);
-          div.classList.remove("selected");
-        } else {
-          selectedCharacters.add(name);
-          div.classList.add("selected");
-        }
+        div.classList.toggle("selected");
       });
       characterSelection.appendChild(div);
     });
 
-    // 設定確定ボタン
+    const setupScreen = document.getElementById("setup-screen");
+    const dayProgressScreen = document.getElementById("day-progress-screen");
+    const confirmSetupButton = document.getElementById("confirm-setup");
+    const dayLog = document.getElementById("day-log");
+    const nextDayButton = document.getElementById("next-day");
+
+    let dayCount = 1;
+
     confirmSetupButton.addEventListener("click", () => {
-      if (selectedCharacters.size === 0) {
-        alert("キャラクターを選択してください！");
-        return;
-      }
       setupScreen.classList.add("hidden");
       dayProgressScreen.classList.remove("hidden");
-      dayLog.innerHTML = "<p>ゲームが開始されました！</p>";
+      dayLog.innerHTML = `<p>ゲーム設定が完了しました。DAY 1 を開始します。</p>`;
     });
 
-    // 次のDAYボタン
-    let dayCount = 1;
     nextDayButton.addEventListener("click", () => {
       dayLog.innerHTML += `<p>DAY ${++dayCount} の進行を開始します。</p>`;
     });
 
     // 保存機能
-    saveGameButton.addEventListener("click", () => {
-      const gameState = {
-        selectedCharacters: Array.from(selectedCharacters),
-        dayCount,
-        log: dayLog.innerHTML
-      };
-      localStorage.setItem("gnosiaGame", JSON.stringify(gameState));
+    document.getElementById("save-progress").addEventListener("click", () => {
+      localStorage.setItem("progress", JSON.stringify({ dayCount, log: dayLog.innerHTML }));
       alert("進行状況を保存しました！");
     });
 
     // ロード機能
-    loadGameButton.addEventListener("click", () => {
-      const savedState = localStorage.getItem("gnosiaGame");
-      if (!savedState) {
-        alert("保存された状態がありません！");
-        return;
+    document.getElementById("load-progress").addEventListener("click", () => {
+      const savedData = JSON.parse(localStorage.getItem("progress"));
+      if (savedData) {
+        dayCount = savedData.dayCount;
+        dayLog.innerHTML = savedData.log;
+        alert("進行状況をロードしました！");
+      } else {
+        alert("保存データが見つかりません！");
       }
-      const gameState = JSON.parse(savedState);
-      selectedCharacters.clear();
-      gameState.selectedCharacters.forEach(name => selectedCharacters.add(name));
-      dayCount = gameState.dayCount;
-      dayLog.innerHTML = gameState.log;
-      setupScreen.classList.add("hidden");
-      dayProgressScreen.classList.remove("hidden");
-      alert("保存された状態をロードしました！");
     });
   </script>
 </body>
