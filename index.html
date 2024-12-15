@@ -10,12 +10,8 @@
       margin: 0;
       padding: 10px;
     }
-    .hidden {
-      display: none;
-    }
-    .visible {
-      display: block;
-    }
+    .hidden { display: none; }
+    .visible { display: block; }
     .button {
       margin: 5px;
       padding: 10px;
@@ -26,32 +22,18 @@
       cursor: pointer;
       border-radius: 5px;
     }
-    .button:disabled {
-      background-color: #ccc;
+    .button:disabled { background-color: #ccc; }
+    .table {
+      margin: 20px 0;
+      border-collapse: collapse;
+      width: 100%;
     }
-    .character-list {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .character-item {
-      padding: 10px;
+    .table th, .table td {
       border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: 10px;
       text-align: center;
-      cursor: pointer;
     }
-    .character-item.selected {
-      background-color: #4CAF50;
-      color: white;
-    }
-    .role-color {
-      display: inline-block;
-      padding: 5px 10px;
-      margin: 5px;
-      border-radius: 5px;
-    }
+    .role-color { display: inline-block; padding: 5px 10px; border-radius: 5px; }
     .role-gnosia { background-color: red; color: white; }
     .role-human { background-color: blue; color: white; }
   </style>
@@ -59,90 +41,135 @@
 <body>
   <div id="setup-screen" class="visible">
     <h2>ゲーム設定</h2>
-    <label for="player-count">人数（1〜15人）:</label>
-    <input type="number" id="player-count" min="1" max="15" value="15"><br><br>
-    
     <h3>参加キャラクターを選択してください:</h3>
-    <div id="character-selection" class="character-list"></div>
-    
-    <h3>役職を選択してください:</h3>
-    <label>グノーシア人数:</label>
-    <select id="gnosia-count">
-      <option value="1">1人</option>
-      <option value="2">2人</option>
-      <option value="3">3人</option>
-    </select><br>
-    <label><input type="checkbox" id="role-engineer"> エンジニア</label><br>
-    <label><input type="checkbox" id="role-doctor"> ドクター</label><br>
-    <label><input type="checkbox" id="role-guard-duty"> 留守番</label><br>
-    <label><input type="checkbox" id="role-guardian-angel"> 守護天使</label><br>
-    <label><input type="checkbox" id="role-ac-follower"> AC主義者</label><br>
-    <label><input type="checkbox" id="role-bug"> バグ</label><br><br>
+    <div id="character-selection"></div>
     <button class="button" id="confirm-setup">設定確定</button>
   </div>
 
   <div id="day-progress-screen" class="hidden">
     <h2>DAY進行</h2>
-    <div id="day-log"></div>
-    <button class="button" id="save-progress">進行状況を保存</button>
-    <button class="button" id="load-progress">保存した進行状況をロード</button><br>
+    <h3>DAY <span id="current-day">1</span></h3>
+
+    <h3>検査結果を記録</h3>
+    <table class="table" id="result-table">
+      <thead>
+        <tr>
+          <th>役職</th>
+          <th>検査対象</th>
+          <th>結果</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>エンジニア</td>
+          <td>
+            <select id="engineer-target"></select>
+          </td>
+          <td>
+            <select id="engineer-result">
+              <option value="unknown">未選択</option>
+              <option value="human">人間</option>
+              <option value="gnosia">グノーシア</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>ドクター</td>
+          <td>
+            <select id="doctor-target"></select>
+          </td>
+          <td>
+            <select id="doctor-result">
+              <option value="unknown">未選択</option>
+              <option value="human">人間</option>
+              <option value="gnosia">グノーシア</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>襲撃先・コールドスリープ情報</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>項目</th>
+          <th>対象</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>襲撃先</td>
+          <td>
+            <select id="attack-target"></select>
+          </td>
+        </tr>
+        <tr>
+          <td>コールドスリープ</td>
+          <td>
+            <select id="cold-sleep-target"></select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
     <button class="button" id="next-day">次のDAYへ</button>
-    <h3>役職カミングアウト</h3>
-    <div>
-      <span class="role-color role-gnosia">グノーシア</span>
-      <span class="role-color role-human">人間</span>
-    </div>
   </div>
 
   <script>
     const characters = ["セツ", "ジナ", "ラキオ", "SQ", "ステラ", "しげみち", "コメット", "シピ", "ククルシカ", "ジョナス", "オトメ", "夕里子", "沙明", "レムナン"];
+    let currentDay = 1;
+    const setupScreen = document.getElementById("setup-screen");
+    const dayProgressScreen = document.getElementById("day-progress-screen");
     const characterSelection = document.getElementById("character-selection");
+    const nextDayButton = document.getElementById("next-day");
+    const currentDaySpan = document.getElementById("current-day");
 
-    // キャラクター選択リストを生成
+    // 初期化
+    function initSelectionOptions(selectElement) {
+      selectElement.innerHTML = '<option value="unknown">未選択</option>';
+      characters.forEach(char => {
+        const option = document.createElement("option");
+        option.value = char;
+        option.textContent = char;
+        selectElement.appendChild(option);
+      });
+    }
+
+    // キャラクター選択を生成
     characters.forEach(name => {
       const div = document.createElement("div");
-      div.className = "character-item";
       div.textContent = name;
-      div.addEventListener("click", () => {
-        div.classList.toggle("selected");
-      });
+      div.className = "character-item";
       characterSelection.appendChild(div);
     });
 
-    const setupScreen = document.getElementById("setup-screen");
-    const dayProgressScreen = document.getElementById("day-progress-screen");
-    const confirmSetupButton = document.getElementById("confirm-setup");
-    const dayLog = document.getElementById("day-log");
-    const nextDayButton = document.getElementById("next-day");
+    // 各セレクトボックス初期化
+    const engineerTarget = document.getElementById("engineer-target");
+    const doctorTarget = document.getElementById("doctor-target");
+    const attackTarget = document.getElementById("attack-target");
+    const coldSleepTarget = document.getElementById("cold-sleep-target");
+    initSelectionOptions(engineerTarget);
+    initSelectionOptions(doctorTarget);
+    initSelectionOptions(attackTarget);
+    initSelectionOptions(coldSleepTarget);
 
-    let dayCount = 1;
+    // DAY進行処理
+    nextDayButton.addEventListener("click", () => {
+      currentDay++;
+      currentDaySpan.textContent = currentDay;
 
-    confirmSetupButton.addEventListener("click", () => {
+      // 情報クリア
+      engineerTarget.value = "unknown";
+      doctorTarget.value = "unknown";
+      attackTarget.value = "unknown";
+      coldSleepTarget.value = "unknown";
+    });
+
+    // 設定画面の確定
+    document.getElementById("confirm-setup").addEventListener("click", () => {
       setupScreen.classList.add("hidden");
       dayProgressScreen.classList.remove("hidden");
-      dayLog.innerHTML = `<p>ゲーム設定が完了しました。DAY 1 を開始します。</p>`;
-    });
-
-    nextDayButton.addEventListener("click", () => {
-      dayLog.innerHTML += `<p>DAY ${++dayCount} の進行を開始します。</p>`;
-    });
-
-    // 保存機能
-    document.getElementById("save-progress").addEventListener("click", () => {
-      localStorage.setItem("progress", JSON.stringify({ dayCount, log: dayLog.innerHTML }));
-      alert("進行状況を保存しました！");
-    });
-
-    // ロード機能
-    document.getElementById("load-progress").addEventListener("click", () => {
-      const savedData = JSON.parse(localStorage.getItem("progress"));
-      if (savedData) {
-        dayCount = savedData.dayCount;
-        dayLog.innerHTML = savedData.log;
-        alert("進行状況をロードしました！");
-      } else {
-        alert("保存データが見つかりません！");
-      }
     });
   </script>
 </body>
